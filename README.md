@@ -1,75 +1,105 @@
-# React + TypeScript + Vite
+# Guia de Destinos Interativo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Uma aplicação web que permite aos usuários pesquisar por cidades ao redor do mundo e obter informações relevantes para viajantes, como clima em tempo real, um mapa interativo e os principais pontos turísticos da região.
 
-Currently, two official plugins are available:
+Este projeto foi desenvolvido como parte de um trabalho acadêmico sobre aplicações cliente/servidor que consomem múltiplas APIs.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Funcionalidades
 
-## React Compiler
+-   ✅ **Busca Dinâmica:** Pesquise por qualquer cidade do mundo.
+-   ✅ **Clima em Tempo Real:** Exibe a temperatura e as condições climáticas atuais.
+-   ✅ **Mapa Interativo:** Mostra um mapa do Google Maps centrado na cidade pesquisada.
+-   ✅ **Pontos Turísticos:** Exibe marcadores no mapa para as principais atrações turísticas.
+-   ✅ **Lista Interativa:** Apresenta uma lista dos pontos turísticos que, ao ser clicada, centraliza e dá zoom no local correspondente no mapa.
+-   ✅ **Informações no Mapa:** Ao clicar em um marcador no mapa, uma janela de informações (InfoWindow) é exibida.
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## Tecnologias Utilizadas
 
-## Expanding the ESLint configuration
+Este projeto foi construído com tecnologias modernas do ecossistema front-end.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Ferramenta | Descrição |
+| :--- | :--- |
+| **React** | Biblioteca principal para a construção da interface de usuário. |
+| **TypeScript** | Superset do JavaScript que adiciona tipagem estática para um código mais robusto. |
+| **Vite** | Ferramenta de build extremamente rápida para o ambiente de desenvolvimento. |
+| **Axios** | Cliente HTTP para fazer as requisições para as APIs externas. |
+| **@react-google-maps/api**| Biblioteca para integrar o Google Maps de forma fácil em componentes React. |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### APIs Consumidas
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+-   **OpenWeatherMap API:** Para obter os dados de clima.
+-   **Google Maps API:** Para a renderização do mapa interativo.
+-   **Google Places API:** Para buscar os pontos turísticos.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Como Rodar o Projeto Localmente
+
+Siga estas instruções para configurar e executar o projeto no seu computador.
+
+### Pré-requisitos
+
+Antes de começar, certifique-se de que você tem o **Node.js** instalado na sua máquina. A versão LTS é recomendada.
+
+-   [Download do Node.js](https://nodejs.org/)
+
+A instalação do Node.js já inclui o `npm` (Node Package Manager).
+
+### 1. Clonar o Repositório
+
+Primeiro, clone este repositório para a sua máquina local:
+
+```bash
+git clone [URL_DO_SEU_REPOSITORIO_GIT]
+cd guia-de-destinos
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Instalar as Dependências
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Com o terminal aberto na pasta raiz do projeto (`guia-de-destinos`), execute o comando abaixo. Ele irá ler o arquivo `package.json` e baixar todas as bibliotecas e pacotes necessários para a pasta `node_modules`.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install 
 ```
-Dependências para instalar
-npm install axios
+
+3. Configurar as Chaves de API (Variáveis de Ambiente)
+Este é o passo mais importante para que a aplicação possa se comunicar com os serviços externos. Faremos isso de forma segura, sem expor as chaves no código.
+
+3.1. Crie o arquivo de ambiente
+
+Na raiz do projeto, crie um arquivo chamado .env. Você pode fazer isso manualmente ou usando um dos comandos abaixo no seu terminal:
+
+No Windows (CMD ou PowerShell):
+
+Snippet de código
+
+copy NUL .env
+No Mac ou Linux:
+
+Bash
+
+touch .env
+3.2. Preencha o arquivo .env
+
+Abra o arquivo .env que você acabou de criar e cole o seguinte conteúdo dentro dele:
+
+Ini, TOML
+
+# =================================================
+# VARIÁVEIS DE AMBIENTE - GUIA DE DESTINOS
+# =================================================
+
+# Chave da API do Google Cloud Platform
+# Necessária para Maps JavaScript API e Places API.
+# Obtenha em: [https://console.cloud.google.com/](https://console.cloud.google.com/)
+VITE_GOOGLE_MAPS_API_KEY="SUA_CHAVE_DO_GOOGLE_VAI_AQUI"
+
+# Chave da API do OpenWeatherMap
+# Necessária para os dados de clima.
+# Obtenha em: [https://openweathermap.org/](https://openweathermap.org/)
+VITE_OPENWEATHER_API_KEY="SUA_CHAVE_DO_OPENWEATHER_VAI_AQUI"
+3.3. Adicione suas chaves secretas
+
+Agora, substitua os textos de exemplo ("SUA_CHAVE_..._AQUI") pelas suas chaves de API reais que você gerou nos painéis do Google Cloud e do OpenWeatherMap.
+
+Nota de Segurança: O arquivo .gitignore já está configurado para nunca enviar o arquivo .env para o repositório, garantindo que suas chaves permaneçam seguras e locais na sua máquina.
