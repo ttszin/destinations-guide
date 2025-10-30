@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
-// --- NOVOS IMPORTS DO REACT ICONS (CORRIGIDOS) ---
-import { FaSearch, FaThermometerHalf, FaCloud, FaMapMarkerAlt, FaMapMarkedAlt } from 'react-icons/fa'; // FaMapMarkedAlt adicionado
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { FaSearch, FaThermometerHalf, FaCloud, FaMapMarkerAlt, FaMapMarkedAlt, FaWikipediaW } from 'react-icons/fa';
+
+import './App.css';
 
 // --- Interfaces ---
 interface WeatherData {
@@ -25,7 +26,23 @@ interface Place {
   vicinity: string;
 }
 
-const containerStyle = { width: '100%', height: '400px', borderRadius: '10px' };
+// --- Tipagem para a Resposta da Wikipedia ---
+interface WikiPage {
+  pageid: number;
+  title: string;
+  extract: string;
+  pageprops?: { // <-- MUDANÇA AQUI: Adicionamos a propriedade opcional
+    disambiguation?: string;
+  };
+}
+
+interface WikiQueryResult {
+  pages: {
+    [pageId: string]: WikiPage;
+  };
+}
+
+const containerStyle = { width: '100%', height: '400px' };
 
 function App() {
   const [cidade, setCidade] = useState("");
@@ -35,7 +52,9 @@ function App() {
   const [mapCenter, setMapCenter] = useState({ lat: -14.235, lng: -51.925 }); // Centro do Brasil
   const [zoom, setZoom] = useState(4);
   const [places, setPlaces] = useState<Place[]>([]);
-  // const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null); // Estado para destaque de marcador (opcional da Tarefa 3)
+  const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+  const [wikiExtract, setWikiExtract] = useState<string | null>(null);
+
 
   const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -53,32 +72,64 @@ function App() {
     setWeatherData(null);
     setError(null);
     setPlaces([]);
-    // setSelectedPlaceId(null);
+    setSelectedPlace(null);
+    setWikiExtract(null);
 
     const openWeatherApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
 
     try {
+      // --- 1. Busca Clima ---
       const weatherResponse = await axios.get<WeatherData>(
         `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${openWeatherApiKey}&units=metric&lang=pt_br`
       );
-      const { coord } = weatherResponse.data;
+      
+      const { coord, name: nomeCidade } = weatherResponse.data;
       const center = { lat: coord.lat, lng: coord.lon };
       
       setWeatherData(weatherResponse.data);
       setMapCenter(center);
       setZoom(13);
 
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      // --- 2. Busca Pontos Turísticos (Google Places) ---
       const placesUrl = `${proxyUrl}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${center.lat},${center.lng}&radius=5000&type=tourist_attraction&key=${googleApiKey}`;
       
-      const placesResponse = await axios.get<{ results: Place[] }>(placesUrl);
-      setPlaces(placesResponse.data.results);
+      axios.get<{ results: Place[] }>(placesUrl).then(response => {
+        setPlaces(response.data.results);
+      }).catch(err => {
+        console.error("Erro ao buscar pontos turísticos:", err);
+      });
+
+      // --- 3. Busca Curiosidade (Wikipedia) ---
+      // <-- MUDANÇA AQUI: Adicionamos 'pageprops' ao parâmetro 'prop'
+      const wikiUrl = `${proxyUrl}https://pt.wikipedia.org/w/api.php?action=query&format=json&prop=extracts|pageprops&exintro=true&explaintext=true&redirects=1&titles=${encodeURIComponent(nomeCidade)}`;
+      
+      axios.get<{ query: WikiQueryResult }>(wikiUrl).then(response => {
+        const pages = response.data.query.pages;
+        const pageId = Object.keys(pages)[0];
+        const page = pages[pageId]; // <-- MUDANÇA AQUI: Pegamos o objeto da página
+        
+        if (pageId && page.extract) {
+          // <-- MUDANÇA AQUI: Verificamos se a propriedade 'disambiguation' existe
+          if (page.pageprops && page.pageprops.disambiguation !== undefined) {
+            // É uma página de desambiguação, não fazemos nada.
+            console.log("Wikipedia retornou uma página de desambiguação.");
+            setWikiExtract(null);
+          } else {
+            // É um extrato válido, podemos exibir.
+            setWikiExtract(page.extract);
+          }
+        }
+      }).catch(err => {
+        console.error("Erro ao buscar dados da Wikipedia:", err);
+      });
 
     } catch (err) {
-      setError("Cidade não encontrada ou erro ao buscar dados. Tente novamente.");
-      console.error("Erro na busca:", err);
+      // Isso é o erro 404 do OpenWeatherMap. Está correto!
+      setError("Cidade não encontrada. Tente novamente.");
+      console.error("Erro na busca principal:", err);
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 
@@ -86,98 +137,105 @@ function App() {
     const newCenter = place.geometry.location;
     setMapCenter(newCenter);
     setZoom(15);
-    // setSelectedPlaceId(place.place_id);
+    setSelectedPlace(place);
   };
 
+  const handleMarkerClick = (place: Place) => {
+    setSelectedPlace(place);
+  };
+
+  // --- O restante do JSX (return) continua o mesmo ---
   return (
-    // Removido style inline para usar estilos do #root no App.css
-    <div className="app-container"> {/* Se precisar de um wrapper, use uma classe sem estilos de tamanho */}
-      <h1>Guia de Destinos Interativo</h1>
+    <div className="app-container">
+      <h1><FaMapMarkedAlt style={{ marginRight: '10px' }} />Guia de Destinos</h1>
       
-      {/* --- BLOCO DO FORMULÁRIO --- */}
-      <form onSubmit={handleBusca} style={{ marginBottom: '20px' }}>
+      <form onSubmit={handleBusca} className="search-bar-form">
         <input
           type="text"
           value={cidade}
           onChange={(e) => setCidade(e.target.value)}
           placeholder="Digite o nome de uma cidade"
-          // Melhorando os estilos inline para botões e inputs
-          style={{ padding: '10px', fontSize: '16px', border: '1px solid #ccc', borderRadius: '4px', marginRight: '10px' }}
+          className="search-input"
+          disabled={loading}
         />
-        <button 
-          type="submit" 
-          style={{ padding: '10px 15px', fontSize: '16px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer', borderRadius: '4px', border: 'none', backgroundColor: '#3498db', color: 'white' }}
-        > 
-          <FaSearch style={{ marginRight: '5px' }} /> Buscar 
+        <button type="submit" className="search-button" disabled={loading}> 
+          <FaSearch /> {loading ? 'Buscando...' : 'Buscar'}
         </button>
       </form>
 
-      {/* --- BLOCOS DE LOADING E ERRO COMPLETOS --- */}
-      {/* SPINNER (TAREFA 4) */}
       {loading && (
-        <div className="spinner-container">
+        <div className="status-container spinner-container">
           <div className="spinner"></div>
           <p>Buscando dados da cidade...</p>
         </div>
       )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      
-      {/* --- BLOCO DO CLIMA COMPLETO (WEATHER CARD) --- */}
-      {weatherData && (
-        // Aplicando a classe para o fade-in e layout (Tarefa 3)
-        <div className="weather-card"> 
-          <h2>Clima em {weatherData.name}</h2>
-          <p style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}><FaThermometerHalf style={{ marginRight: '8px', color: '#e74c3c' }} />Temperatura: {weatherData.main.temp}°C</p>
-          <p style={{ display: 'flex', alignItems: 'center' }}><FaCloud style={{ marginRight: '8px', color: '#3498db' }} />Condição: {weatherData.weather[0].description}</p>
-        </div>
-      )}
+      {error && <p className="status-container error-message">{error}</p>}
 
-      {/* EMPTY STATE (TAREFA 4) - Exibido se não houver dados, erro, ou loading */}
-      {(!weatherData && places.length === 0 && !error && !loading) && (
-        <div className="empty-state">
-          <FaMapMarkedAlt size={60} style={{ color: '#aaa' }} /> 
+      {!weatherData && !loading && !error && (
+        <div className="status-container empty-state">
+          <FaMapMarkedAlt size={60} /> 
           <h2>Pronto para a aventura!</h2>
-          <p>Pesquise por uma cidade para começar a planejar sua viagem e visualizar o mapa e atrações.</p>
+          <p>Pesquise por uma cidade para começar a planejar sua viagem.</p>
         </div>
       )}
 
+      {weatherData && (
+        <div className="info-card"> 
+          <h2>{weatherData.name}</h2>
+          
+          {wikiExtract && (
+            <p className="wiki-extract">
+              <FaWikipediaW className="icon-wiki" /> {wikiExtract}
+            </p>
+          )}
 
-      {/* --- BLOCO DE CONTEÚDO PRINCIPAL (LISTA E MAPA) --- */}
-      {/* Aplicando a classe content-layout para a Responsividade (Tarefa 1) */}
-      {(weatherData || places.length > 0) && (
+          <p><FaThermometerHalf className="icon-temp" />Temperatura: {weatherData.main.temp}°C</p>
+          <p><FaCloud className="icon-cloud" />Condição: {weatherData.weather[0].description}</p>
+        </div>
+      )}
+
+      {places.length > 0 && isLoaded && (
         <div className="content-layout"> 
           
-          {/* Coluna da Lista de Lugares */}
-          {places.length > 0 && (
-            // Aplicando a classe list-column para o fade-in e layout
-            <div className="list-column"> 
-              <h3>Pontos Turísticos</h3>
-              <ul style={{ listStyle: 'none', padding: 0 }}>
-                {places.map((place) => (
-                  // Aplicando a classe place-item para o efeito hover (Tarefa 3)
-                  <li key={place.place_id} onClick={() => handlePlaceClick(place)} className="place-item">
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <FaMapMarkerAlt style={{ marginRight: '5px', color: '#e74c3c' }} />
-                      <strong>{place.name}</strong>
-                    </div>
-                    <small>Nota: {place.rating} ⭐</small>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <div className="list-column"> 
+            <h3>Pontos Turísticos</h3>
+            <ul className="places-list">
+              {places.map((place) => (
+                <li key={place.place_id} onClick={() => handlePlaceClick(place)} className="place-item">
+                  <div>
+                    <FaMapMarkerAlt style={{ color: '#e74c3c' }} />
+                    <strong>{place.name}</strong>
+                  </div>
+                  <small>Nota: {place.rating ? `${place.rating} ⭐` : 'Sem avaliação'}</small>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-          {/* Coluna do Mapa */}
-          {isLoaded && (
-            // Aplicando a classe map-column para o fade-in e layout
-            <div className="map-column">
-              <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={zoom}>
-                {places.map((place) => (
-                  <MarkerF key={place.place_id} position={place.geometry.location} title={place.name} />
-                ))}
-              </GoogleMap>
-            </div>
-          )}
+          <div className="map-column">
+            <GoogleMap mapContainerStyle={containerStyle} center={mapCenter} zoom={zoom}>
+              {places.map((place) => (
+                <MarkerF 
+                  key={place.place_id} 
+                  position={place.geometry.location} 
+                  title={place.name}
+                  onClick={() => handleMarkerClick(place)}
+                />
+              ))}
+
+              {selectedPlace && (
+                 <InfoWindowF
+                    position={selectedPlace.geometry.location}
+                    onCloseClick={() => setSelectedPlace(null)}
+                 >
+                   <div>
+                     <strong>{selectedPlace.name}</strong>
+                     <p>{selectedPlace.vicinity}</p>
+                   </div>
+                 </InfoWindowF>
+              )}
+            </GoogleMap>
+          </div>
         </div>
       )}
     </div>

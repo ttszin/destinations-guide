@@ -1,5 +1,4 @@
 :root {
-  /* Regras de font-family e background-color removidas para serem definidas no App.css */
   line-height: 1.5;
   font-weight: 400;
 
@@ -23,7 +22,6 @@ a:hover {
 
 body {
   margin: 0;
-  /* display: flex e place-items: center foram removidos */
   min-width: 320px;
   min-height: 100vh;
 }
@@ -55,7 +53,6 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    /* background-color: #ffffff; removido */
   }
   a:hover {
     color: #747bff;
