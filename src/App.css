@@ -1,0 +1,181 @@
+/* 1. IMPORTS GLOBAIS (Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+/* 2. ESTILOS GLOBAIS (BODY e #ROOT) */
+
+body {
+  /* Tipografia da Tarefa 2 */
+  font-family: 'Inter', sans-serif; 
+
+  /* Fundo da Tarefa 3 (Onde a imagem bg-mobile-light.jpg é aplicada) */
+  background-image: url('../assets/bg-mobile-light.jpg'); /* !!! AJUSTE O CAMINHO AQUI !!! */
+  background-size: cover; 
+  background-repeat: no-repeat; 
+  background-attachment: fixed; 
+  min-height: 100vh; 
+}
+
+#root {
+  /* Estilos originais */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  
+  /* NOVOS ESTILOS para destacar o conteúdo sobre o fundo */
+  background-color: rgba(255, 255, 255, 0.9); /* Fundo semi-transparente */
+  border-radius: 12px; /* Pequeno arredondamento */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Sombra suave */
+}
+
+/* 3. ESTILOS DE COMPONENTES E ANIMAÇÕES (CÓDIGO ORIGINAL) */
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+/* 4. MEDIA QUERIES (SOLUÇÃO TAREFA 1: RESPONSIVIDADE) */
+
+/* Estilos Padrão (MOBILE-FIRST: 0px a 768px) */
+.content-layout {
+  display: flex;
+  flex-direction: column; 
+  gap: 1.5rem; 
+}
+
+/* Media Query para Telas Maiores (min-width: 769px e acima) */
+@media (min-width: 769px) {
+  .content-layout {
+    flex-direction: row; 
+    gap: 2rem; 
+    text-align: left; 
+  }
+
+  .content-layout > * {
+    flex: 1; 
+  }
+}
+
+/* 5. ANIMAÇÕES DE APARECIMENTO (FADE-IN) */
+/* Definição da Animação de Fade-In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px); /* Move levemente para baixo para um efeito mais suave */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aplicação da Animação nos Cards ao serem renderizados */
+.weather-card, 
+.list-column,
+.map-column {
+  /* Garante que o elemento comece transparente */
+  opacity: 0; 
+  /* Aplica a animação: nome, duração, função de tempo, e modo (para manter o estado final) */
+  animation: fadeIn 0.5s ease-out forwards; 
+}
+
+/* Estilo para os itens da lista */
+.place-item {
+  /* Garante que a transição seja suave para todas as propriedades listadas */
+  transition: all 0.3s ease-in-out; 
+  /* Outros estilos básicos da lista */
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 8px; /* Adicionado para separar melhor os itens */
+}
+
+.place-item:hover {
+  /* Opção 1: Leve Zoom (Scale) e Sombra */
+  transform: scale(1.02); 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+  background-color: #f9f9f9; /* Fundo sutil */
+}
+
+/* --- ESTILOS DO SPINNER (TAREFA 4) --- */
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  gap: 10px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #3498db; /* Cor primária do seu spinner */
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- ESTILOS DO EMPTY STATE (TAREFA 4) --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 20px;
+  margin-top: 30px;
+  border: 1px dashed #ddd; /* Borda tracejada */
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-state h2 {
+  margin-top: 15px;
+  color: #333;
+}
+
+.empty-state p {
+  color: #666;
+  max-width: 400px;
+}
