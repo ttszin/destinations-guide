@@ -31,7 +31,7 @@ interface WikiPage {
   pageid: number;
   title: string;
   extract: string;
-  pageprops?: { // <-- MUDANÇA AQUI: Adicionamos a propriedade opcional
+  pageprops?: {
     disambiguation?: string;
   };
 }
@@ -101,16 +101,15 @@ function App() {
       });
 
       // --- 3. Busca Curiosidade (Wikipedia) ---
-      // <-- MUDANÇA AQUI: Adicionamos 'pageprops' ao parâmetro 'prop'
       const wikiUrl = `${proxyUrl}https://pt.wikipedia.org/w/api.php?action=query&format=json&prop=extracts|pageprops&exintro=true&explaintext=true&redirects=1&titles=${encodeURIComponent(nomeCidade)}`;
       
       axios.get<{ query: WikiQueryResult }>(wikiUrl).then(response => {
         const pages = response.data.query.pages;
         const pageId = Object.keys(pages)[0];
-        const page = pages[pageId]; // <-- MUDANÇA AQUI: Pegamos o objeto da página
+        const page = pages[pageId];
         
         if (pageId && page.extract) {
-          // <-- MUDANÇA AQUI: Verificamos se a propriedade 'disambiguation' existe
+          // Verifica se a propriedade 'disambiguation' existe
           if (page.pageprops && page.pageprops.disambiguation !== undefined) {
             // É uma página de desambiguação, não fazemos nada.
             console.log("Wikipedia retornou uma página de desambiguação.");
@@ -125,7 +124,6 @@ function App() {
       });
 
     } catch (err) {
-      // Isso é o erro 404 do OpenWeatherMap. Está correto!
       setError("Cidade não encontrada. Tente novamente.");
       console.error("Erro na busca principal:", err);
     } finally {
