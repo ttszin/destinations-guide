@@ -93,7 +93,6 @@ function App() {
 
     // Carrega as chaves de API e o URL do proxy
     const openWeatherApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/'; // Proxy para evitar erros de CORS
 
     try {
       // --- API Call 1: OpenWeatherMap (Busca Principal) ---
@@ -112,7 +111,7 @@ function App() {
 
       // --- API Call 2: Google Places (Busca Secundária) ---
       // Usamos .then() aqui para que ela rode em "segundo plano" e não trave a UI
-      const placesUrl = `${proxyUrl}https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${center.lat},${center.lng}&radius=5000&type=tourist_attraction&key=${googleApiKey}`;
+      const placesUrl = `/api/google/maps/api/place/nearbysearch/json?location=${center.lat},${center.lng}&radius=5000&type=tourist_attraction&key=${googleApiKey}`;
       
       axios.get<{ results: Place[] }>(placesUrl).then(response => {
         setPlaces(response.data.results); // Atualiza o estado com os pontos turísticos
@@ -123,7 +122,7 @@ function App() {
 
       // --- API Call 3: Wikipedia (Busca Secundária) ---
       // Também roda em "segundo plano". Usamos o nome da cidade retornado pelo OpenWeatherMap para ter a grafia correta.
-      const wikiUrl = `${proxyUrl}https://pt.wikipedia.org/w/api.php?action=query&format=json&prop=extracts|pageprops&exintro=true&explaintext=true&redirects=1&titles=${encodeURIComponent(nomeCidade)}`;
+      const wikiUrl = `/api/wiki/api.php?action=query&format=json&prop=extracts|pageprops&exintro=true&explaintext=true&redirects=1&titles=${encodeURIComponent(nomeCidade)}`;
       
       axios.get<{ query: WikiQueryResult }>(wikiUrl).then(response => {
         const pages = response.data.query.pages;
