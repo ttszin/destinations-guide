@@ -4,6 +4,8 @@ import axios from 'axios'; // Biblioteca para fazer chamadas de API (requisiçõ
 import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api'; // Componentes para integrar o Google Maps
 import { FaSearch, FaThermometerHalf, FaCloud, FaMapMarkerAlt, FaMapMarkedAlt, FaWikipediaW } from 'react-icons/fa'; // Ícones para a UI
 
+// A Latitude e Longitude fornecidas pela API de Clima atuam como a linguagem comum que torna as APIs de Mapas e Clima compatíveis no projeto
+
 // --- Importação de Estilos ---
 import './App.css'; // Importa CSS principal da aplicação
 
