@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/google/:match*",
+      "destination": "https://maps.googleapis.com/:match*"
+    },
+    {
+      "source": "/api/wiki/:match*",
+      "destination": "https://pt.wikipedia.org/w/:match*"
+    }
+  ]
+}
