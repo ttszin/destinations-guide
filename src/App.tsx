@@ -110,7 +110,7 @@ function App() {
       setZoom(13);
 
       // --- API Call 2: Google Places (Busca Secundária) ---
-      // Usamos .then() aqui para que ela rode em "segundo plano" e não trave a UI
+      // Chamada de API utilizando os caminhos de proxy do Vercel
       const placesUrl = `/api/google/maps/api/place/nearbysearch/json?location=${center.lat},${center.lng}&radius=5000&type=tourist_attraction&key=${googleApiKey}`;
       
       axios.get<{ results: Place[] }>(placesUrl).then(response => {
@@ -121,7 +121,7 @@ function App() {
       });
 
       // --- API Call 3: Wikipedia (Busca Secundária) ---
-      // Também roda em "segundo plano". Usamos o nome da cidade retornado pelo OpenWeatherMap para ter a grafia correta.
+      // Chamada de API utilizando os caminhos de proxy do Vercel
       const wikiUrl = `/api/wiki/api.php?action=query&format=json&prop=extracts|pageprops&exintro=true&explaintext=true&redirects=1&titles=${encodeURIComponent(nomeCidade)}`;
       
       axios.get<{ query: WikiQueryResult }>(wikiUrl).then(response => {
